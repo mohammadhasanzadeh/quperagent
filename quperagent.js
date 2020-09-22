@@ -12,7 +12,7 @@ class Request
         let query = "";
         for (let key of Object.keys(params))
         {
-            query += `${key}=${params[key]}`;
+            query += `${key}=${params[key]}&`;
         }
         return query;
     }
@@ -39,7 +39,6 @@ class Request
 
         if (this.m_headers["Content-Type"] === "application/json")
         {
-
             return JSON.stringify(this.m_params);
         }
 
