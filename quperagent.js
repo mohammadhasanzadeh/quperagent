@@ -7,6 +7,14 @@ class Request
         this.m_timeout = 5000;
     }
 
+    _case_insensetive_in(key, object)
+    {
+       const keys = Object.keys(object).map((key) => {
+                                                return key.toLowerCase();
+                                            });
+        return keys.indexOf(key);
+    }
+
     _url_encode_params(params)
     {
         let query = "";
@@ -27,22 +35,21 @@ class Request
     _evaluate_params(xhr)
     {
 
-        if (!("Content-Type" in this.m_headers))
+        if (this._case_insensetive_in("content-type", this.m_headers) === -1)
         {
-            this.m_headers["Content-Type"] =  "application/json";
-            xhr.setRequestHeader("Content-Type", "application/json");
-
+            this.m_headers["content-type"] =  "application/json";
+            xhr.setRequestHeader("content-type", "application/json");
         }
 
         if (this.m_params instanceof String)
             return this.m_params;
 
-        if (this.m_headers["Content-Type"] === "application/json")
+        if (this.m_headers["content-type"] === "application/json")
         {
             return JSON.stringify(this.m_params);
         }
 
-        if (this.m_headers["Content-Type"] === "application/x-www-form-urlencoded")
+        if (this.m_headers["content-type"] === "application/x-www-form-urlencoded")
             return this._url_encode_params(this.m_params);
 
         return m_params;
@@ -54,7 +61,9 @@ class Request
             return;
 
         if (!this.m_headers)
-            this.m_headers = {"Content-Type": "application/json"};
+        {
+            this.m_headers = {"content-type": "application/json"};
+        }
 
         for (let key of Object.keys(this.m_headers))
         {
@@ -78,7 +87,11 @@ class Request
 
     set(headers)
     {
-        this.m_headers = headers;
+        this.m_headers = {};
+        for (let key in headers)
+        {
+            this.m_headers[key.toLowerCase()] = headers[key];
+        }
         return this;
     }
 
@@ -110,7 +123,7 @@ class Request
             response.body = null;
             if (xhr.status >= 200 && xhr.status < 300)
             {
-                const response_header = xhr.getResponseHeader("Content-Type");
+                const response_header = xhr.getResponseHeader("content-type");
                 if (response_header === "application/json")
                 {
                     response.body = JSON.parse(xhr.responseText);
