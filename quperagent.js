@@ -18,6 +18,10 @@ class Request
     _url_encode_params(params)
     {
         let query = "";
+
+        if (!params)
+            return query;
+
         for (let key of Object.keys(params))
         {
             query += `${key}=${params[key]}&`;
