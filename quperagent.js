@@ -89,6 +89,13 @@ class Request
         return this;
     }
 
+    put(url)
+    {
+        this.m_method = "PUT";
+        this.m_url = url;
+        return this;
+    }
+
     set(headers)
     {
         this.m_headers = {};
@@ -141,7 +148,7 @@ class Request
             }
         };
 
-        if (["POST"].indexOf(this.m_method) > -1)
+        if (["POST", "PUT"].indexOf(this.m_method) > -1)
         {
             xhr.send(this._evaluate_params(xhr));
         }
