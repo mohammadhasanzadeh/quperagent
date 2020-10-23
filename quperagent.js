@@ -133,12 +133,13 @@ class Request
         xhr.timeout = this.m_timeout;
         this._generate_headers(xhr);
 
-        xhr.onload = () =>
-        {
-            let response = {}
-            response.status = xhr.status;
-            response.text = xhr.responseText;
-            response.body = null;
+        xhr.onload = () => {
+            const response = {
+                "status": xhr.status,
+                "text": xhr.responseText,
+                "body": null
+            };
+
             if (xhr.status >= 200 && xhr.status < 300)
             {
                 const response_header = xhr.getResponseHeader("content-type");
@@ -155,14 +156,21 @@ class Request
             }
         };
 
+        xhr.onerror = () => {
+            if (failure)
+            {
+                failure({
+                            "status": xhr.status,
+                            "text": xhr.responseText,
+                            "body": null
+                        });
+            }
+        };
+
         if (["POST", "PUT", "DELETE"].indexOf(this.m_method) > -1)
-        {
             xhr.send(this._evaluate_params(xhr));
-        }
         else
-        {
             xhr.send(null);
-        }
     }
 }
 
