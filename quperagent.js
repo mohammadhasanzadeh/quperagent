@@ -96,6 +96,13 @@ class Request
         return this;
     }
 
+    del(url)
+    {
+        this.m_method = "DELETE";
+        this.m_url = url;
+        return this;
+    }
+
     set(headers)
     {
         this.m_headers = {};
@@ -148,7 +155,7 @@ class Request
             }
         };
 
-        if (["POST", "PUT"].indexOf(this.m_method) > -1)
+        if (["POST", "PUT", "DELETE"].indexOf(this.m_method) > -1)
         {
             xhr.send(this._evaluate_params(xhr));
         }
