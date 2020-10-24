@@ -128,7 +128,7 @@ class Request
     end(success, failure=null)
     {
         const xhr = new XMLHttpRequest();
-        const url = (["GET"].indexOf(this.m_method) > -1) ? `${this.m_url}?${this._evaluate_query()}` : this.m_url;
+        const url = (["GET", "DELETE"].indexOf(this.m_method) > -1) ? `${this.m_url}?${this._evaluate_query()}` : this.m_url;
         xhr.open(this.m_method, url, true);
         xhr.timeout = this.m_timeout;
         this._generate_headers(xhr);
@@ -167,7 +167,7 @@ class Request
             }
         };
 
-        if (["POST", "PUT", "DELETE"].indexOf(this.m_method) > -1)
+        if (["POST", "PUT"].indexOf(this.m_method) > -1)
             xhr.send(this._evaluate_params(xhr));
         else
             xhr.send(null);
