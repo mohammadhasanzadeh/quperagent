@@ -140,13 +140,12 @@ class Request
                 "body": null
             };
 
+            const response_header = xhr.getResponseHeader("content-type");
+            if (response_header === "application/json")
+                response.body = JSON.parse(xhr.responseText);
+
             if (xhr.status >= 200 && xhr.status < 300)
             {
-                const response_header = xhr.getResponseHeader("content-type");
-                if (response_header === "application/json")
-                {
-                    response.body = JSON.parse(xhr.responseText);
-                }
                 success(response);
             }
             else
