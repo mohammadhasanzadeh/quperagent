@@ -13,7 +13,7 @@ And then import `quperagent.js` into your `qml` file:
 
 ## Usage:
 ### HTTP requests:
-a simple quperagent request can be looklike the following:
+a simple quperagent request can be look like the following:
 ```javascript
         HTTPC.request()
         .get(`https://example.test`)
