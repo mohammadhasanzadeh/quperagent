@@ -7,6 +7,11 @@ class Request
         this.m_timeout = 5000;
     }
 
+    _is_string(data)
+    {
+        return typeof(data) === "string" || data instanceof String;
+    }
+
     _case_insensetive_in(key, object)
     {
        const keys = Object.keys(object).map((key) => {
@@ -31,7 +36,7 @@ class Request
 
     _evaluate_query()
     {
-        if (this.m_query instanceof String)
+        if (this._is_string(this.m_query))
             return this.m_query;
         return this._url_encode_params(this.m_query);
     }
@@ -45,7 +50,7 @@ class Request
             xhr.setRequestHeader("content-type", "application/json");
         }
 
-        if (this.m_params instanceof String)
+        if (this._is_string(this.m_params))
             return this.m_params;
 
         if (this.m_headers["content-type"] === "application/json")
