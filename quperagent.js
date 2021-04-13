@@ -1,10 +1,15 @@
 .pragma library
 
+.import "observable.js" as JsObservable
+.import "interceptor_base.js" as INTERCEPTOR
+.import "config.js" as GLOBAL
+
 class Request
 {
     constructor()
     {
         this.m_timeout = 5000;
+        this.m_observables = new JsObservable.Observable();
     }
 
     _is_string(data)
@@ -130,14 +135,45 @@ class Request
         return this;
     }
 
+    timeout(time)
+    {
+        this.m_timeout = time;
+        return this;
+    }
+
+    intercept(interceptors)
+    {
+        if (Array.isArray(interceptors))
+        {
+            for (let item of interceptors)
+            {
+                if (!item instanceof INTERCEPTOR.InterceptorBase)
+                {
+                    throw "Invalid interceptor";
+                }
+                this.m_observables.subscribe(item);
+            }
+            return this;
+        }
+
+        if (!interceptors instanceof INTERCEPTOR.InterceptorBase)
+        {
+            throw "Invalid interceptor";
+        }
+        this.m_observables.subscribe(interceptors);
+        return this;
+    }
+
     end(success, failure=null)
     {
+        this.m_observables.notify("on_request", [this]);
         const xhr = new XMLHttpRequest();
         const url = (["GET", "DELETE"].indexOf(this.m_method) > -1) ? `${this.m_url}?${this._evaluate_query()}` : this.m_url;
         xhr.open(this.m_method, url, true);
         xhr.timeout = this.m_timeout;
         this._generate_headers(xhr);
-
+        // FIXME: is there better solution?
+        const self = this;
         xhr.onload = () => {
             const response = {
                 "status": xhr.status,
@@ -151,24 +187,29 @@ class Request
 
             if (xhr.status >= 200 && xhr.status < 300)
             {
+                self.m_observables.notify("on_success", [self, response]);
                 success(response);
+                self.m_observables.notify("on_post_success", [self, response]);
             }
             else
             {
+                self.m_observables.notify("on_failure", [self, response]);
                 if (failure)
                     failure(response);
+                self.m_observables.notify("on_post_failure", [self, response]);
             }
-        };
+        }
 
         xhr.onerror = () => {
-            if (failure)
-            {
-                failure({
-                            "status": xhr.status,
-                            "text": xhr.responseText,
-                            "body": null
-                        });
+            let error = {
+                "status": xhr.status,
+                "text": xhr.responseText,
+                "body": null
             }
+            self.m_observables.notify("on_failure", [self, error]);
+            if (failure)
+                failure(error);
+            self.m_observables.notify("on_post_failure", [self, error]);
         };
 
         if (["POST", "PUT"].indexOf(this.m_method) > -1)
@@ -180,5 +221,5 @@ class Request
 
 function request()
 {
-    return new Request();
+    return new Request().intercept(GLOBAL.interceptors);
 }
