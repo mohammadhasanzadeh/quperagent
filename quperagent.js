@@ -1,6 +1,8 @@
 .pragma library
 
 .import "observable.js" as JsObservable
+.import "interceptor_base.js" as INTERCEPTOR
+.import "config.js" as GLOBAL
 
 class Request
 {
@@ -145,7 +147,7 @@ class Request
         {
             for (let item of interceptors)
             {
-                if (!item instanceof InterceptorBase)
+                if (!item instanceof INTERCEPTOR.InterceptorBase)
                 {
                     throw "Invalid interceptor";
                 }
@@ -154,7 +156,7 @@ class Request
             return this;
         }
 
-        if (!interceptors instanceof InterceptorBase)
+        if (!interceptors instanceof INTERCEPTOR.InterceptorBase)
         {
             throw "Invalid interceptor";
         }
@@ -217,25 +219,7 @@ class Request
     }
 }
 
-class InterceptorBase
-{
-    constructor(context = {})
-    {
-        this.context = context;
-    }
-
-    on_request(request) {}
-
-    on_success(request, response) {}
-
-    on_failure(request, response) {}
-
-    on_post_success(request, response) {}
-    
-    on_post_failure(request, response) {}
-}
-
 function request()
 {
-    return new Request();
+    return new Request().intercept(GLOBAL.interceptors);
 }

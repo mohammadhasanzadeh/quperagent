@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>quperagent.js</file>
         <file>observable.js</file>
+        <file>config.js</file>
+        <file>interceptor_base.js</file>
     </qresource>
 </RCC>
