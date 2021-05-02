@@ -13,7 +13,7 @@ class InterceptorBase
 
     on_failure(request, response) {}
 
-    on_post_success(request, response) {}
+    on_end_successed(request, response) {}
 
-    on_post_failure(request, response) {}
+    on_end_failed(request, response) {}
 }

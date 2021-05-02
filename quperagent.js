@@ -8,6 +8,7 @@ class Request
 {
     constructor()
     {
+        this.m_headers = {};
         this.m_timeout = 5000;
         this.m_observables = new JsObservable.Observable();
     }
@@ -74,7 +75,7 @@ class Request
         if (!xhr instanceof XMLHttpRequest)
             return;
 
-        if (!this.m_headers)
+        if (Object.keys(this.m_headers).length === 0)
         {
             this.m_headers = {"content-type": "application/json"};
         }
@@ -85,37 +86,51 @@ class Request
         }
     }
 
-    post(url)
+    post(url=null)
     {
         this.m_method = "POST";
-        this.m_url = url;
+        if (url)
+            this.setUrl(url);
         return this;
     }
 
-    get(url)
+    get(url=null)
     {
         this.m_method = "GET";
-        this.m_url = url;
+        if (url)
+            this.setUrl(url);
         return this;
     }
 
-    put(url)
+    put(url=null)
     {
         this.m_method = "PUT";
+        if (url)
+            this.setUrl(url);
+        return this;
+    }
+
+    del(url=null)
+    {
+        this.m_method = "DELETE";
+        if (url)
+            this.setUrl(url);
+        return this;
+    }
+
+    setUrl(url)
+    {
         this.m_url = url;
         return this;
     }
 
-    del(url)
+    url()
     {
-        this.m_method = "DELETE";
-        this.m_url = url;
-        return this;
+        return this.m_url;
     }
 
     set(headers)
     {
-        this.m_headers = {};
         for (let key in headers)
         {
             this.m_headers[key.toLowerCase()] = headers[key];
@@ -189,14 +204,14 @@ class Request
             {
                 self.m_observables.notify("on_success", [self, response]);
                 success(response);
-                self.m_observables.notify("on_post_success", [self, response]);
+                self.m_observables.notify("on_end_successed", [self, response]);
             }
             else
             {
                 self.m_observables.notify("on_failure", [self, response]);
                 if (failure)
                     failure(response);
-                self.m_observables.notify("on_post_failure", [self, response]);
+                self.m_observables.notify("on_end_failed", [self, response]);
             }
         }
 
@@ -209,7 +224,7 @@ class Request
             self.m_observables.notify("on_failure", [self, error]);
             if (failure)
                 failure(error);
-            self.m_observables.notify("on_post_failure", [self, error]);
+            self.m_observables.notify("on_end_failed", [self, error]);
         };
 
         if (["POST", "PUT"].indexOf(this.m_method) > -1)
@@ -219,7 +234,12 @@ class Request
     }
 }
 
-function request()
+function request(global_config={
+                    interceptor: true,
+                 })
 {
-    return new Request().intercept(GLOBAL.interceptors);
+    const i_request = new Request();
+    if (global_config.interceptor)
+        i_request.intercept(GLOBAL.interceptors);
+    return i_request;
 }
