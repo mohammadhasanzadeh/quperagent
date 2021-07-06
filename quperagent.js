@@ -96,6 +96,21 @@ class Request
         }
     }
 
+    _parse_response_header(headers)
+    {
+        const headers_list = headers.trim().split(/[\r\n]+/);
+        const header_map = {};
+        // Create a map of header names to values
+        for (let item of headers_list)
+        {
+            const parts = item.split(': ');
+            const header = parts.shift();
+            const value = parts.join(': ');
+            header_map[header] = value;
+        }
+        return header_map;
+    }
+
     post(url=null)
     {
         this.m_method = "POST";
@@ -211,6 +226,7 @@ class Request
                 "status": xhr.status,
                 "text": xhr.responseText,
                 "body": null,
+                "headers": this._parse_response_header(xhr.getAllResponseHeaders())
             };
 
             const response_header = xhr.getResponseHeader("content-type");
@@ -241,7 +257,8 @@ class Request
             let error = {
                 "status": xhr.status,
                 "text": xhr.responseText,
-                "body": null
+                "body": null,
+                "headers": this._parse_response_header(xhr.getAllResponseHeaders())
             }
             self.m_observables.notify("on_failure", [self, error]);
             if (failure)
