@@ -4,12 +4,22 @@
 .import "interceptor_base.js" as INTERCEPTOR
 .import "config.js" as GLOBAL
 
+const ResponseType = {
+    Default:        "",
+    ArrayBuffer:    "arraybuffer",
+    Blob:           "blob",
+    Json:           "json",
+    Text:           "text"
+}
+Object.freeze(ResponseType);
+
 class Request
 {
     constructor()
     {
         this.m_headers = {};
         this.m_timeout = 5000;
+        this.m_response_type = ResponseType.Default;
         this.m_observables = new JsObservable.Observable();
     }
 
@@ -156,6 +166,12 @@ class Request
         return this;
     }
 
+    responseType(response_type)
+    {
+        this.m_response_type = response_type;
+        return this;
+    }
+
     intercept(interceptors)
     {
         if (Array.isArray(interceptors))
@@ -184,6 +200,7 @@ class Request
         this.m_observables.notify("on_request", [this]);
         const xhr = new XMLHttpRequest();
         const url = (["GET", "DELETE"].indexOf(this.m_method) > -1) ? `${this.m_url}?${this._evaluate_query()}` : this.m_url;
+        xhr.responseType = this.m_response_type;
         xhr.open(this.m_method, url, true);
         xhr.timeout = this.m_timeout;
         this._generate_headers(xhr);
@@ -193,12 +210,17 @@ class Request
             const response = {
                 "status": xhr.status,
                 "text": xhr.responseText,
-                "body": null
+                "body": null,
             };
 
             const response_header = xhr.getResponseHeader("content-type");
-            if (response_header === "application/json")
-                response.body = JSON.parse(xhr.responseText);
+
+            response.body = xhr.response;
+            if (xhr.responseType === ResponseType.Default)
+            {
+                if (response_header === "application/json")
+                    response.body = JSON.parse(xhr.response);
+            }
 
             if (xhr.status >= 200 && xhr.status < 300)
             {
