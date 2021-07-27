@@ -24,3 +24,9 @@ function intercept(incomming_interceptors)
     }
     interceptors.push(incomming_interceptors);
 }
+
+function reset(config={"interceptor": true})
+{
+    if (config.interceptor)
+        interceptors = [];
+}
