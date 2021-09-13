@@ -56,7 +56,8 @@ You can add a query string to the some HTTP request like `GET` and `DELETE` easi
         .get(`https://example.test`)
         .query({
                    "search": "foo",
-                   "sort": "bar"
+                   "sort": "bar",
+                   "groupby": ["foo", "bar"]
                 })
         .end((res) => {}, (err) => {});
 ```
@@ -64,7 +65,7 @@ Also, you may need to send a raw query string in some cases, so you can pass a s
 ```javascript
         HTTPC.request()
         .get(`https://example.test`)
-        .query("list=1&list=2&list=3")
+        .query("search=foo&sort=bar")
         .end((res) => {}, (err) => {});
 ```
 
