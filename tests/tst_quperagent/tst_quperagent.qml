@@ -46,4 +46,35 @@ TestCase
         QUPERAGENT_CONFIG.reset();
         compare(QUPERAGENT_CONFIG.interceptors.length, 0, "Global config reset");
     }
+
+    function test_query_string_encode()
+    {
+        HTTPC.request()
+        .get("https://httpbin.org/get")
+        .query({
+                   "d": ["a", "b", "c"],
+                   "a": 1,
+                   "b": "foo",
+                   "c": true,
+               })
+        .end((res) => {
+                 const params = res.body.url.split('?')[1];
+                 compare(params, "d=a&d=b&d=c&a=1&b=foo&c=true&", "Query string test");
+                 done();
+             });
+        async.wait(timeout);
+    }
+
+    function test_raw_query_string_encode()
+    {
+        HTTPC.request()
+        .get("https://httpbin.org/get")
+        .query("d=a&d=b&d=c&a=1&b=foo&c=true")
+        .end((res) => {
+                 const params = res.body.url.split('?')[1];
+                 compare(params, "d=a&d=b&d=c&a=1&b=foo&c=true", "Raw Query string test");
+                 done();
+             });
+        async.wait(timeout);
+    }
 }

@@ -45,6 +45,12 @@ class Request
 
         for (let key of Object.keys(params))
         {
+            if (Array.isArray(params[key]))
+            {
+                for (let item of params[key])
+                    query += `${key}=${item}&`;
+                continue;
+            }
             query += `${key}=${params[key]}&`;
         }
         return query;
