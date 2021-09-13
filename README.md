@@ -65,7 +65,7 @@ Also, you may need to send a raw query string in some cases, so you can pass a s
 ```javascript
         HTTPC.request()
         .get(`https://example.test`)
-        .query("search=foo&sort=bar")
+        .query("search=foo&sort=bar&groupby=foo&groupby=bar")
         .end((res) => {}, (err) => {});
 ```
 
